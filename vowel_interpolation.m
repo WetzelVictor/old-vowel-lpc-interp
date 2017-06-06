@@ -3,43 +3,86 @@
 
 clear all
 close all
-clc
 
 % importing data
 [sig, Fe] = audioread('data/full-sentence.wav');
 
+% Analysis variables
+Nwin = 512;
+win = hann(Nwin);
+
+% pre-emphasis filter
+preemph = [1 0.63];
+fsig = filter(1, preemph, sig);
 
 % Slicing vowels
-a.sig = sig(89000:93000);
+flagA = 2000;
+flagB = flagA + Nwin* 10 - 1;
+a.sig = fsig( flagA:flagB );
 
-
-a.Fe = Fe;
-o.Fe = Fe;
 
 %%% Gathering basic infos about wav files
-
-% vowel 'e'
-%.N = length(o.sig);
-%.t = [0:o.N] * o.To;
-%.Te = 1 / o.Fe;
-%.name = 'Temporal representation of vowel ''e''';
-
-% vowel 'a'
+a.Fe = Fe;
 a.N = length(a.sig);
 a.Te = 1 / a.Fe;
-a.t = [0:a.N] * a.Te;
+a.t = [0:a.N - 1] * a.Te;
 a.name = 'Temporal representation of vowel ''a''';
+a.Nframes = a.N / Nwin;
 
-%% LPC estimation
-Nwin = 512;
-noise = randn(1,Nwin);
-a.win = hann(Nwin)';
+%%% Synthesis signal
+% creating source signal
+noise = randn(Nwin , 1);
+impTrain = zeros(length(noise), 1);
+for i = 1:5
+  impTrain(i * 100) = 1;
+end
 
-a.A = lpc(a.sig(1,1:512).*a.win, 30);
+synthSource = impTrain;
 
-a.est = filter(a.A, 1, noise);
+% creating window
+wintemp = win;
+for i = 1:9
+  win = [win wintemp];
+end
 
+clear wintemp
+
+
+%% Plot signal for vowel  
 figure;
-plot(a.A);
-hold on
-plot(a.sig(1:512));
+plot(a.t, a.sig)
+title(a.name)
+xlabel('Time (s)')
+ylabel('Amplitude')
+grid on
+saveas(gcf, 'vowel-a', 'png')
+
+
+%% Computes LPC
+% Reshapes matrix
+a.frames = reshape(a.sig, Nwin, []);
+
+% windowing signal
+a.frames = a.frames .* win;
+a.p = 25;
+[a.A, a.E] = lpc(a.frames, a.p);
+
+% synthesis
+a.estimated = zeros(a.N, 0);
+
+
+for i = 1: a.Nframes
+  a.estimated([1:Nwin] * i, 1) = filter([-a.A(i,2:end)], 1, synthSource); 
+end
+
+
+
+% == GRAPH ==
+figure;
+plot(a.t, a.estimated)
+title('LPC estimated signal')
+xlabel('Time (s)')
+ylabel('Amplitude')
+grid on
+
+
