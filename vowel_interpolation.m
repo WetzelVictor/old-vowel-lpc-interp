@@ -6,10 +6,10 @@ close all
 
 % importing data
 [sig, Fe] = audioread('data/full-sentence.wav');
-
+sig = sig/max(abs(sig));
 % Analysis variables
-Nwin = 512;
-win = hann(Nwin);
+Nwin = 300;
+win = hann(Nwin, 'periodic');
 
 % pre-emphasis filter
 preemph = [1 0.63];
@@ -21,32 +21,14 @@ flagB = flagA + Nwin* 10 - 1;
 a.sig = fsig( flagA:flagB );
 
 
-%%% Gathering basic infos about wav files
+%% Gathering basic infos about wav files
 a.Fe = Fe;
 a.N = length(a.sig);
 a.Te = 1 / a.Fe;
 a.t = [0:a.N - 1] * a.Te;
 a.name = 'Temporal representation of vowel ''a''';
 a.Nframes = a.N / Nwin;
-
-%%% Synthesis signal
-% creating source signal
-noise = randn(Nwin , 1);
-impTrain = zeros(length(noise), 1);
-for i = 1:5
-  impTrain(i * 100) = 1;
-end
-
-synthSource = impTrain;
-
-% creating window
-wintemp = win;
-for i = 1:9
-  win = [win wintemp];
-end
-
-clear wintemp
-
+a.p = 8;
 
 %% Plot signal for vowel  
 figure;
@@ -59,30 +41,15 @@ saveas(gcf, 'vowel-a', 'png')
 
 
 %% Computes LPC
-% Reshapes matrix
-a.frames = reshape(a.sig, Nwin, []);
+[a.A, a.G] = lpcEncode(a.sig, a.p, win);
+a.estimated = lpcDecode(a.A, a.G, win);
 
-% windowing signal
-a.frames = a.frames .* win;
-a.p = 25;
-[a.A, a.E] = lpc(a.frames, a.p);
-
-% synthesis
-a.estimated = zeros(a.N, 0);
-
-
-for i = 1: a.Nframes
-  a.estimated([1:Nwin] * i, 1) = filter([-a.A(i,2:end)], 1, synthSource); 
-end
-
-
-
-% == GRAPH ==
 figure;
-plot(a.t, a.estimated)
-title('LPC estimated signal')
+plot(a.t, a.estimated, a.t, a.sig)
+title(a.name)
 xlabel('Time (s)')
 ylabel('Amplitude')
 grid on
-
+legend('estimated signal','original signal')
+saveas(gcf, 'comparison-1', 'png')
 
