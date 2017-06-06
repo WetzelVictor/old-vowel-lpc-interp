@@ -7,7 +7,7 @@ from scikits.talkbox import lpc
 from matplotlib import pyplot as plt
 
 ### DEFINE FUNCTIONS ###
-def get_LPC(x):
+def get_LPC(x, Npoles):
     # Get Hamming window.
     N = len(x)
     win = np.hamming(N)
@@ -15,12 +15,15 @@ def get_LPC(x):
 
     # Apply window and high pass filter.
 
-    x = x * w
-    x = lfilter([1., -0.63], 1, x1)
+    x = x * win
+    x = lfilter([1., -0.63], 1, x)
 
     # Get LPC.
-    A, e, k = lpc(x1, 8)
-    return(A, e, k)
+    A, e, k = lpc(x, Npoles)
+    return(A) 
+
+
+
 
 ### PROGRAM ###
 
@@ -42,16 +45,22 @@ firstVowel = sig[flagA:flagB]
 Nwin = 512 
 N = len(firstVowel) 
 Nframes = N / Nwin
+Npoles = 25
 
-A = np.empty([Nframes, Nwin]) # to store LPC
+A = np.empty([Nframes , Npoles + 1]) # to store LPC
 e = A
 k = A
 
 # Plot to verify
-plt.figure()
-plt.plot(firstVowel);
-plt.grid(True)
-plt.show();
+#   plt.figure()
+#   plt.plot(firstVowel);
+#   plt.grid(True)
+#   plt.show();
 
-# Loop through vowel to get LPCs
-Wvowel = firstVowel.reshape(N/Nwin,Nwin)
+# Reshape to get 4 lines of signal
+Wvowel = firstVowel.reshape(Nframes,Nwin)
+
+### COMPUTING LPCs ###
+for i in xrange(4):
+    A[i, :] = get_LPC(Wvowel[i, :], Npoles)
+
