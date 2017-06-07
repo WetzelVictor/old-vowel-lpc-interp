@@ -6,24 +6,46 @@ close all; clear all; clc;
 x = mean(x, 2); % mono
 x = 0.9*x/max(abs(x)); % normalize
 
-x = resample(x, 8000, Fe); % resampling to 8kHz
-Fe = 8000;
 
-w = hann(floor(0.03*Fe), 'periodic'); % using 30ms Hann window
+%% prep
+% WINDOW
+Nwin = floor(0.03*Fe);% using 30ms Hann window
+w = hann(floor(0.03*Fe), 'periodic'); % window creation
 
+% GLOBAL VARIABLES
+tInterp = 5; % time of interpolation
+nInterp = floor(tInterp * Fe);
+Nframes = floor(nInterp / Nwin); % number of frames
+p = 8; % number of LPC poles 
 
-%% LPC encode 
-p = 24; % using 6th order
-[A, G] = lpcEncode(x, p, w);
+% INSTANCIATION
 
+[B, G] = lpcEncode(x, p, w);
+Nframes = length(G);
+%F = ones(1, Nframes) * 440 / Fe; % pitch guide (Hz)
+%G = ones(1, Nframes) * 4.174937490656687e-03; % vocal effort 
 
-%% pitch detection
 [F, ~] = lpcFindPitch(x, w, 5);
+
+%% Interpolating poles
+% loading poles
+v1p = B(:,20);
+v2p = B(:,5);
+
+% ... into A
+A = zeros(p, 2);
+A(:,1) = v1p;
+A(:,2) = v2p;
+
+% Interpolate
+A = interpolatePoles(A, Nframes);
+%% LPC encode 
+%% pitch detection
 
 
 %% LPC decode
-xhat = lpcDecode(A, [G; F], w, 200/Fe);
+interpolatedSig = lpcDecode(B, [G; F], w, 200/Fe);
+%interpolatedSig = interpolatedSig*0.9/max(abs(interpolatedSig));
 
-
-%% save result to file
-audiowrite('output/lpc_pitch_example.wav', xhat, Fe); % uncomment to save to file
+%% Encoding result to .wav
+%audiowrite('output/interpolatedSignal.wav', interpolatedSig , Fe);

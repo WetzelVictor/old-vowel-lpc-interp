@@ -20,7 +20,7 @@ function [ff, p] = lpcFindPitch(x, w, np, fcut, pcut, hcut)
 X = stackOLA(x, w); % stack the windowed signals
 [~,n] = size(X);
 
-% handle defaults
+%% Handle defaults
 if nargin < 7,
     hcut = 0.5;
 end
@@ -37,7 +37,7 @@ if nargin < 4,
    np = 5;
 end
 
-% get peak frequencies 
+%% get peak frequencies 
 f = zeros(np, n); % frequencies
 p = zeros(1, n); % power
 for i = 1:n,
