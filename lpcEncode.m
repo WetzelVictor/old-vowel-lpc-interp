@@ -7,9 +7,8 @@
 % 
 % A - the coefficients
 % G - the signal power
-% E - the full source (error) signal
 %
-function [A, G, E] = lpcEncode(x, p, w)
+function [A, G] = lpcEncode(x, p, w)
 
 X = stackOLA(x, w); % stack the windowed signals
 [nw, n] = size(X);
@@ -22,10 +21,9 @@ E = zeros(nw, n);
 %% LPC encode
 for i = 1:n,
     % Computing LPC
-    [a, g, e] = myLPC(X(:,i), p);
-   
+    [a, g] = lpc(X(:,i), p - 1);
+    
     % Store result
     A(:, i) = a;
     G(i) = g;
-    E(2:nw, i) = e;
 end
