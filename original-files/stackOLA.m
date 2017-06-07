@@ -1,4 +1,4 @@
-%%% Based on Hyung-Suk Kim script "stackOLA.m"
+%
 % Stacks a signal into overlap-add chunks.
 %
 % x - a single channel signal
@@ -6,11 +6,7 @@
 %
 % X - the overlap-add stack
 %
-function X = stackOLA(x, w, R)
-
-if nargin < 3
-  R = 0.5;
-end
+function X = stackOLA(x, w)
 
 n = length(x);
 nw = length(w);

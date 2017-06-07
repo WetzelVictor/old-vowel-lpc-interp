@@ -14,13 +14,17 @@ function [A, G, E] = lpcEncode(x, p, w)
 X = stackOLA(x, w); % stack the windowed signals
 [nw, n] = size(X);
 
-% LPC encode
+%% Instanciate variables
 A = zeros(p, n);
 G = zeros(1, n);
 E = zeros(nw, n);
+
+%% LPC encode
 for i = 1:n,
+    % Computing LPC
     [a, g, e] = myLPC(X(:,i), p);
-    
+   
+    % Store result
     A(:, i) = a;
     G(i) = g;
     E(2:nw, i) = e;
