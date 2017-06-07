@@ -10,6 +10,8 @@
 %
 function xhat = lpcDecode(A, GFE, w, lowcut)
 
+%% Prep
+% Apply lowcut if specified
 if nargin < 4,
     lowcut = 0;
 end
@@ -17,11 +19,11 @@ end
 [ne, n] = size(GFE);
 nw = length(w);
 
-% synthesize estimates for each chunk
+% Instanciates output signal
 Xhat = zeros(nw, n);
 
-if ne < 2, % GFE is only the signal power
-    
+%% Synthesize
+if ne < 2, % GFE is only the signal power 
     for i = 1:n,
         src = randn(nw, 1); % noise
         Xhat(:,i) = w .* filter( 1, [-1; A(:,i)], sqrt(GFE(i))*src);
@@ -29,8 +31,11 @@ if ne < 2, % GFE is only the signal power
     
     % render down to signal
     xhat = pressStack(Xhat);
-% -------------------------------------------------------
-% ------------ GFE is the pitch frequency and signal power
+
+
+    
+% ---------------------------------------------
+% - GFE is the pitch frequency and signal power
 elseif ne < 3, 
     F = GFE(2,:); % pitch frequency
     G = GFE(1,:); % power
@@ -39,12 +44,14 @@ elseif ne < 3,
     nw2 = round(nw/2);
     xhat = zeros(nw2*n, 1);
     
+    % Creating source signal
     for i = 1:n,
-        
-        % create source
-        if F(i) > 0, % pitched
+        % if signal is pitched 
+        if F(i) > 0, 
+            % instanciating source signal variable
             src = zeros(nw2,1);
-            
+           
+            % computing sample interval for frequency 
             step = round(1/F(i));
             pts = (offset+1):step:nw2;
             
@@ -52,8 +59,9 @@ elseif ne < 3,
                 offset = step + pts(end) - nw2;
                 src(pts) = sqrt(step); % impulse train, compensate power
             end
-            
-        else
+        
+        % unpitched sound (consonants)   
+        else 
             src = randn(nw2, 1); % noise
             offset = 0;
         end
@@ -61,8 +69,9 @@ elseif ne < 3,
         % filter
         xhat( nw2*i + (1:nw2) ) = filter( 1, [-1; A(:,i)], sqrt(G(i))*src);
     end
-    
-else % GFE is the error signal
+% ----------------------- 
+% GFE is the error signal 
+else  
     for i = 1:n,
         Xhat(:,i) = w .* filter( 1, [-1; A(:,i)], GFE(:,i));
     end
@@ -70,8 +79,9 @@ else % GFE is the error signal
     % render down to signal
     xhat = pressStack(Xhat);
 end
-    
-% dc blocker hack
+
+
+%% Lowcut (if asked)
 if lowcut > 0,
     [b,a] = butter(10, lowcut, 'high'); 
     xhat = filter(b,a,xhat);
