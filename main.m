@@ -4,8 +4,8 @@ close all; clear all; clc;
 [x, Fe] = audioread('data/full-sentence.wav');
 
 x = 0.9*x/max(abs(x)); % normalize
-x = resample(x, 16000/2, Fe);
-Fe = 16000/2;
+x = resample(x, 44100, Fe);
+Fe = 44100;
 
 %% prep
 % WINDOW
@@ -22,9 +22,7 @@ p = 8; % number of LPC poles
 % INSTANCIATION
 %Nframes = length(G);
 F = ones(1, Nframes) * 440; % pitch guide (Hz)
-G = ones(1, Nframes) * 4.174937490656687e-03; % vocal effort 
-
-%[F, ~] = lpcFindPitch(x, w, 5);
+G = ones(1, Nframes) * 4e-03; % vocal effort 
 
 %% Interpolating poles
 % loading poles
@@ -42,7 +40,7 @@ A = interpolatePoles(A, Nframes);
 %% LPC decode
 %interpolatedSig = lpcDecode(A, [G; F], w, 200/Fe);
 interpolatedSig = zeros(Nwin, Nframes);
-src = createSource(F, Nwin, Fe);
+src = impulseTrain(F, Nwin, Fe);
 interpolatedSig = interpolatedSig*0.9/max(abs(interpolatedSig));
 
 %% Encoding result to .wav

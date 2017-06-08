@@ -1,4 +1,4 @@
-% createSource(F, Nwin, Fe)
+% impulseTrain(F, Nwin, Fe)
 % Create a impulse train depending on a vector F containing frequency target 
 % for every frames
 %
@@ -6,38 +6,42 @@
 % Nwin: number of samples per frame
 % Fe: samplerate (Hz)
 
-function F = createSource(F, Nwin, Fe)
-Nframes = length(F);
-N = Nframes* Nwin ;
-f = zeros(1,N);
+function F = impulseTrain(F, Nwin, Fe)
+Nframes = length(F) 
+% N = Nframes* Nwin ;
+f = zeros(Nwin,Nframes);
 
 %% Loop variables
 offset = 0; step = 0;
 
 for i = 1:Nframes,
   step = floor(Fe / F(1,i)); % computing step size 
-  
+  count = step; 
   
   for j = 1:Nwin,
     % if last loop got out of the vector, it applies an offset 
     if offset > 0
-      j = j + offset;
+      count = offset;
       offset = 0;
     end
-   
+    
+    % check if count = 0
+    if count == 0,
+      f(j, i) = 1;
+      count = step;
+    else
+      count = count - 1;
+    end
 
-    % computing where to put the sample 
-    flag = (i - 1) * Nwin + j; 
-    f(1,flag) = 1;
     
     % computing the offset size only if the algorithm
     % is reaching out of the vector
-    if j + step > Nwin,
+    if count + step > Nwin,
       offset = step - Nframes + j;
       break;
-    else
-      j = j + step;
     end
+
+
   end
 end
 
