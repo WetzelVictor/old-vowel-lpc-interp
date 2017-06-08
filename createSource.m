@@ -32,7 +32,7 @@ for i = 1:Nframes,
     
     % computing the offset size only if the algorithm
     % is reaching out of the vector
-    if j + step > Nframes,
+    if j + step > Nwin,
       offset = step - Nframes + j;
       break;
     else
