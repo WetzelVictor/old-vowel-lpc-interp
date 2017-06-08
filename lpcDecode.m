@@ -77,7 +77,7 @@ else
     end
 
     % render down to signal
-    xhat = pressStack(Xhat);
+    %%%xhat = pressStack(Xhat);
 end
 
 
