@@ -4,8 +4,8 @@ close all; clear all; clc;
 [x, Fe] = audioread('data/full-sentence.wav');
 
 x = 0.9*x/max(abs(x)); % normalize
-x = resample(x, 16000, Fe);
-Fe = 16000;
+x = resample(x, 16000/2, Fe);
+Fe = 16000/2;
 
 %% prep
 % WINDOW
@@ -16,7 +16,7 @@ w = hann(Nwin, 'periodic'); % window creation
 tInterp = 5; % time of interpolation
 nInterp = floor(tInterp * Fe);
 Nframes = floor(nInterp / Nwin); % number of frames
-p = 25; % number of LPC poles 
+p = 15; % number of LPC poles 
 [B, G] = lpcEncode(x, p, w);
 
 % INSTANCIATION
@@ -29,7 +29,7 @@ G = ones(1, Nframes) * 4.174937490656687e-03; % vocal effort
 %% Interpolating poles
 % loading poles
 v1p = B(:,15);
-v2p = B(:,10);
+v2p = B(:,85);
 
 % ... into A
 A = zeros(p, 2);

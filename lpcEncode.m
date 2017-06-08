@@ -16,13 +16,13 @@ X = stackOLA(x, w); % stack the windowed signals
 %% Instanciate variables
 A = zeros(p, n);
 G = zeros(1, n);
-E = zeros(nw, n);
 
 %% LPC encode
 for i = 1:n,
     % Computing LPC
     [a, g] = lpc(X(:,i), p - 1);
-    
+    % [a,g] = levinson( X(:,i), p-1 );
+
     % Store result
     A(:, i) = a;
     G(i) = g;
