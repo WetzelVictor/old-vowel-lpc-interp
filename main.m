@@ -33,8 +33,8 @@ v2p = B(:,85);
 
 % ... into A
 A = zeros(p, 2);
-A(:,1) = v1p;
-A(:,2) = v2p;
+A(:,1) = sort(v1p);
+A(:,2) = sort(v2p);
 
 % Interpolate
 A = interpolatePoles(A, Nframes);
