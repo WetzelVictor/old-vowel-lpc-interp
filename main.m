@@ -6,7 +6,7 @@ close all; clear all; clc;
 x = 0.9*x/max(abs(x)); % normalize
 
 % WINDOW
-Nwin = floor(0.03*Fe);% using 30ms Hann window
+Nwin = 9;% using 30ms Hann window, trouver un nombre qui marche
 w = hann(Nwin, 'periodic'); % window creation
 
 % GLOBAL VARIABLES
@@ -33,8 +33,8 @@ interpolatedSig = zeros(Nwin, Nframes); % rendered signal
 % loading poles
 flagA = 0;
 flagB = 0; % afficher les flags sur un graph temporel
-v1p = B(:, flagA);
-v2p = B(:, flagB);
+v1p = A(:, flagA);
+v2p = A(:, flagB);
 
 A = zeros(p, 2);
 A(:,1) = sort(v1p, 'ascend');
