@@ -7,8 +7,7 @@
 % Fe: samplerate (Hz)
 
 function F = impulseTrain(F, Nwin, Fe)
-Nframes = length(F) 
-% N = Nframes* Nwin ;
+Nframes = length(F); 
 f = zeros(Nwin,Nframes);
 
 %% Loop variables
