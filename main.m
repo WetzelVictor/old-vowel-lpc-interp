@@ -1,13 +1,9 @@
 close all; clear all; clc;
 
-
 %% PREP 
 % LOAD AUDIO 
 [x, Fe] = audioread('data/full-sentence.wav');
-
 x = 0.9*x/max(abs(x)); % normalize
-%x = resample(x, 44100, Fe);
-%Fe = 44100;
 
 % WINDOW
 Nwin = floor(0.03*Fe);% using 30ms Hann window
@@ -19,8 +15,10 @@ nInterp = floor(tInterp * Fe);
 Nframes = floor(nInterp / Nwin); % number of frames
 p = 25; % number of LPC poles 
 Te = 1/ Fe;
-t = [0 : nInterp] * Te;
 fmax = Fe / 2;
+
+% PLOT VECTORS
+t = [0 : nInterp] * Te;
 f = [-fmax : Fe/nInterp : fmax];
 
 % VECTOR INSTANCIATION
@@ -29,15 +27,15 @@ G = ones(1, Nframes) * 4e-03; % vocal effort
 interpolatedSig = zeros(Nwin, Nframes); % rendered signal
 
 %% Interpolating poles
-% Looking for poles
-% [B, G] = lpcEncode(x, p, w);
-B = rand(p, 1);
-B = B*0.9/(max(abs(B)));
+% On remplace cette ligne par ma propre fonction
+% en mode getPARCOR
+[A, E, K] = getPARCOR(x, p, w);
 % loading poles
-v1p = B(:, 1);
-v2p = B(:, 1);
+flagA = 0;
+flagB = 0; % afficher les flags sur un graph temporel
+v1p = B(:, flagA);
+v2p = B(:, flagB);
 
-% ... into A
 A = zeros(p, 2);
 A(:,1) = sort(v1p, 'ascend');
 A(:,2) = sort(v2p, 'ascend');
