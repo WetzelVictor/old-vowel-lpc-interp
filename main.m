@@ -6,8 +6,11 @@ close all; clear all; clc;
 x = 0.9*x/max(abs(x)); % normalize
 
 % WINDOW
-Nwin = 9;% using 30ms Hann window, trouver un nombre qui marche
+Nwin = 1024; % using 30ms Hann window, trouver un nombre qui marche
 w = hann(Nwin, 'periodic'); % window creation
+while (mod(length(x),Nwin))>0,
+  x = [x; 0];
+end
 
 % GLOBAL VARIABLES
 tInterp = 5; % time of interpolation
@@ -27,12 +30,12 @@ G = ones(1, Nframes) * 4e-03; % vocal effort
 interpolatedSig = zeros(Nwin, Nframes); % rendered signal
 
 %% Interpolating poles
-% On remplace cette ligne par ma propre fonction
-% en mode getPARCOR
+% Computes reflection coefficients
 [A, E, K] = getPARCOR(x, p, w);
+
 % loading poles
-flagA = 0;
-flagB = 0; % afficher les flags sur un graph temporel
+flagA = 40;
+flagB = 80; % afficher les flags sur un graph temporel
 v1p = A(:, flagA);
 v2p = A(:, flagB);
 

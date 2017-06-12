@@ -6,7 +6,7 @@
 % w : window 
 %
 
-function [A, E, L] = getPARCOR(x, p, w)
+function [A, E, K] = getPARCOR(x, p, w)
 
 %% BASIC INFO
 Nw = length(w);
@@ -15,14 +15,17 @@ x = reshape(x, Nw, []); % Eventuellement, stackOLA
 [~ , Nf] = size(x);
 
 %% INSTANCIATION
-A = zeros(p, Nf);
+A = zeros(p + 1, Nf);
 E = zeros(p, Nf);
 K = zeros(p, Nf);
 
 %% COMPUTING
 for i = 1 : Nf,
+  % Autocorrelation coefs put as a Toeplitz matrix
   y = xcorr( x(:, i), 'biased');
-  [A(:,i), E(:,i), K(:,i)] = levinson(y,p);
+  
+  % Solving equation with levinson-durbin algorithm
+  [A(:,i), E(:,i), K(:,i)] = levinson(y, p);
 end
 
 end
