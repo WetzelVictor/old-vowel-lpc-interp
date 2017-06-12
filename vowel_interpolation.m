@@ -37,7 +37,6 @@ title(a.name)
 xlabel('Time (s)')
 ylabel('Amplitude')
 grid on
-saveas(gcf, 'vowel-a', 'png')
 
 
 %% Computes LPC
@@ -51,5 +50,4 @@ xlabel('Time (s)')
 ylabel('Amplitude')
 grid on
 legend('estimated signal','original signal')
-saveas(gcf, 'comparison-1', 'png')
 
