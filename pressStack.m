@@ -8,11 +8,12 @@
 %
 function x = pressStack(X, R)
 
+[nw, count] = size(X);
+
 if nargin < 2
   R = floor(nw*0.5);
 end
 
-[nw, count] = size(X);
 n = (count-1)*R+nw;
 
 x = zeros(n, 1);
