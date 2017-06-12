@@ -15,7 +15,7 @@ x = reshape(x, Nw, []); % Eventuellement, stackOLA
 [~ , Nf] = size(x);
 
 %% INSTANCIATION
-A = zeros(p + 1, Nf);
+A = zeros(p+1, Nf);
 E = zeros(p, Nf);
 K = zeros(p, Nf);
 
@@ -23,7 +23,7 @@ K = zeros(p, Nf);
 for i = 1 : Nf,
   % Autocorrelation coefs put as a Toeplitz matrix
   y = xcorr( x(:, i), 'biased');
-  
+
   % Solving equation with levinson-durbin algorithm
   [A(:,i), E(:,i), K(:,i)] = levinson(y, p);
 end

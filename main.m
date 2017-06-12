@@ -8,15 +8,19 @@ x = 0.9*x/max(abs(x)); % normalize
 % WINDOW
 Nwin = 1024; % using 30ms Hann window, trouver un nombre qui marche
 w = hann(Nwin, 'periodic'); % window creation
+
+% ZERO PADDING
+% if signal cannot be divided in equal chunks
 while (mod(length(x),Nwin))>0,
   x = [x; 0];
 end
 
-% GLOBAL VARIABLES
+%% GLOBAL VARIABLES
+% ANALYSIS
 tInterp = 5; % time of interpolation
 nInterp = floor(tInterp * Fe);
 Nframes = floor(nInterp / Nwin); % number of frames
-p = 25; % number of LPC poles 
+p = 6; % number of LPC poles 
 Te = 1/ Fe;
 fmax = Fe / 2;
 
@@ -28,30 +32,35 @@ f = [-fmax : Fe/nInterp : fmax];
 F = ones(1, Nframes) * 440; % pitch guide (Hz)
 G = ones(1, Nframes) * 4e-03; % vocal effort 
 interpolatedSig = zeros(Nwin, Nframes); % rendered signal
+T = zeros(p, 2);
+poles = zeros(p + 1, Nframes);
 
 %% Interpolating poles
 % Computes reflection coefficients
 [A, E, K] = getPARCOR(x, p, w);
 
 % loading poles
-flagA = 40;
-flagB = 80; % afficher les flags sur un graph temporel
-v1p = A(:, flagA);
-v2p = A(:, flagB);
+flagA = 100;
+flagB = 50; % afficher les flags sur un graph temporel
+v1p = K(:, flagA);
+v2p = K(:, flagB);
 
-A = zeros(p, 2);
-A(:,1) = sort(v1p, 'ascend');
-A(:,2) = sort(v2p, 'ascend');
+T(:,1) = sort(v1p, 'ascend');
+T(:,2) = sort(v2p, 'ascend');
 
 % Interpolate poles
-A = interpolatePoles(A, Nframes);
+T = interpolatePoles(T, Nframes);
+
+for i = 1 : Nframes,
+  poles(:,i) = rc2poly(T(:,i));
+end
 
 %% LPC decode
 % Create source signal
 src = impulseTrain(F, Nwin, Fe);
 
 % synthesize
-interpolatedSig = synthLPC(src, A, Fe);
+interpolatedSig = synthLPC(src, poles, Fe);
 interpolatedSig = reshape(interpolatedSig, 1, []);
 
 %% Encoding result to .wav
